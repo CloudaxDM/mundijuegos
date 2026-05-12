@@ -53,7 +53,7 @@ Explica el *qué* y *por qué* de tus decisiones arquitectónicas (no microaccio
 - **Flujo:** 1) Lee y sigue reglas de `agents.md` y el código actual. 2) Consulta docs actualizadas. 3) Crea/actualiza un TODO si hay >2 pasos. 4) Haz el cambio más pequeño posible. 5) Valida (`uv run reflex compile --dry`, tests o revisión).
 - **No inventes:** Si dudas, la documentación manda. No asumas APIs, props o hooks de Reflex que no puedas verificar.
 - **Arquitectura:** Mantén el State modular, usa `Computed vars` para estado derivado, evita lógica pesada en la UI y no bloquees el servidor (evalúa async).
--Usa "gitup" para todo lo relacionado con github
+- **Peticiones github** Usa `gitup` para todo lo relacionado con peticiones github
 
 ## 2. Fuentes de Verdad (En orden de prioridad)
 1. Skill `reflex-docs`.
