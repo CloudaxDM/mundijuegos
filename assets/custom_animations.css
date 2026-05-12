@@ -1,0 +1,108 @@
+/* ============================================================
+   ANIMACIONES CUSTOM - Valentina's World
+   ============================================================ */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.8; }
+  50% { transform: translateY(-20px) rotate(5deg); opacity: 1; }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-35px) rotate(-8deg) scale(1.1); opacity: 0.9; }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes petal-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 5s ease-in-out infinite;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.animate-petal-fall {
+  animation: petal-fall 1.5s ease-in forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.wave-letter {
+  display: inline-block;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+@keyframes card-flip {
+  0%   { transform: scaleX(0.1); opacity: 0.4; }
+  60%  { transform: scaleX(1.05); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 1; }
+}
+
+.card-flip {
+  animation: card-flip 0.25s ease-out forwards;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 105, 180, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0); }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes slide-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+@keyframes correct-flash {
+  0%, 100% { background: inherit; }
+  50% { background: rgba(152, 255, 152, 0.4); }
+}
+
+.correct-flash {
+  animation: correct-flash 0.6s ease-out;
+}

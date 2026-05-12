@@ -1,3 +1,7 @@
+*.db
+.states
+assets/external/
+.web
 # Node dependencies
 node_modules/
 
@@ -10,3 +14,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+
+# Runtime data
+scores.json
+
+# OpenCode agent config
+.opencode/
