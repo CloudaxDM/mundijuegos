@@ -28,11 +28,11 @@ def stat_card(emoji: str, valor, label: str, acento: str) -> rx.Component:
             rx.text(
                 label,
                 style={
-                    "font_size": "0.6rem",
+                    "font_size": "0.85rem",
                     "color": COLORES["texto_secundario"],
                     "text_align": "center",
                     "text_transform": "uppercase",
-                    "letter_spacing": "0.06em",
+                    "letter_spacing": "0.03em",
                     "font_weight": "700",
                     "line_height": "1.3",
                 },

@@ -6,8 +6,8 @@ from mundijuegos.components.layout import fondo_animado
 from mundijuegos.components.stats import stat_card, ratio_pill, ACENTO_PUNTOS, ACENTO_RECORD
 from mundijuegos.state.puzzle_state import PuzzleState
 
-TILE_SIZE   = "88px"
-TILE_REF    = "58px"
+TILE_SIZE   = "clamp(64px, 20vw, 88px)"
+TILE_REF    = "clamp(42px, 12vw, 58px)"
 
 
 def tile_pieza(t: dict) -> rx.Component:
@@ -24,12 +24,14 @@ def tile_pieza(t: dict) -> rx.Component:
                 "border": f"2px dashed {COLORES['rosa_claro']}",
             },
         ),
-        rx.el.div(
+        rx.el.button(
             rx.text(t["emoji"], font_size="2.4rem", line_height="1"),
             on_click=PuzzleState.click_tile(t["pos"]),
+            aria_label="Mover pieza del puzzle",
             style={
                 "width": TILE_SIZE,
                 "height": TILE_SIZE,
+                "appearance": "none",
                 "border_radius": "0.75rem",
                 "background": "white",
                 "border": f"2px solid {COLORES['rosa_claro']}",
@@ -45,6 +47,10 @@ def tile_pieza(t: dict) -> rx.Component:
                 "transform": "scale(1.07)",
                 "box_shadow": "0 6px 18px rgba(0,0,0,0.17)",
                 "border_color": COLORES["rosa_chicle"],
+            },
+            _focus_visible={
+                "outline": f"4px solid {COLORES['rosa_chicle']}",
+                "outline_offset": "3px",
             },
         ),
     )
@@ -85,8 +91,8 @@ def tile_ref(t: dict) -> rx.Component:
 def imagen_referencia() -> rx.Component:
     return rx.vstack(
         rx.text(
-            "Objetivo",
-            font_size="0.65rem",
+            "Así queda",
+            font_size="0.85rem",
             color=COLORES["texto_secundario"],
             font_weight="700",
             text_transform="uppercase",
@@ -118,9 +124,10 @@ def grid_puzzle() -> rx.Component:
         style={
             "display": "grid",
             "grid_template_columns": PuzzleState.grid_cols,
-            "gap": "0.5rem",
+            "gap": "clamp(0.35rem, 1.5vw, 0.5rem)",
             "width": "100%",
             "max_width": PuzzleState.grid_max_width,
+            "justify_content": "center",
         },
     )
 
@@ -129,11 +136,11 @@ def panel_configuracion() -> rx.Component:
     return rx.card(
         rx.el.div(
             rx.el.div(
-                rx.text("Tamaño", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Nivel", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.hstack(
                     rx.button(
                         "3×3 Fácil",
-                        on_click=PuzzleState.set_config_size(3),
+                        on_click=PuzzleState.cambiar_config_size(3),
                         size="1",
                         radius="full",
                         color_scheme="pink",
@@ -141,7 +148,7 @@ def panel_configuracion() -> rx.Component:
                     ),
                     rx.button(
                         "4×4 Difícil",
-                        on_click=PuzzleState.set_config_size(4),
+                        on_click=PuzzleState.cambiar_config_size(4),
                         size="1",
                         radius="full",
                         color_scheme="pink",
@@ -189,11 +196,11 @@ def panel_configuracion() -> rx.Component:
 def panel_estadisticas() -> rx.Component:
     return rx.vstack(
         rx.hstack(
-            stat_card("👆", PuzzleState.movimientos, "Movimientos", ACENTO_PUNTOS),
+            stat_card("👆", PuzzleState.movimientos, "Toques", ACENTO_PUNTOS),
             stat_card(
                 "🏆",
                 rx.cond(PuzzleState.mejor_movimientos_actual == 0, "—", PuzzleState.mejor_movimientos_actual),
-                "Récord",
+                "Mi mejor",
                 ACENTO_RECORD,
             ),
             spacing="2",
@@ -202,6 +209,29 @@ def panel_estadisticas() -> rx.Component:
         ratio_pill(PuzzleState.partidas_ganadas, PuzzleState.partidas_jugadas),
         spacing="2",
         align="center",
+    )
+
+
+def mensaje_ayuda() -> rx.Component:
+    return rx.cond(
+        PuzzleState.mensaje != "",
+        rx.box(
+            rx.text(
+                PuzzleState.mensaje,
+                color=COLORES["texto_principal"],
+                font_weight="700",
+                text_align="center",
+            ),
+            style={
+                "background": "rgba(255,255,255,0.82)",
+                "border": f"2px solid {COLORES['rosa_claro']}",
+                "border_radius": "1rem",
+                "padding": "0.65rem 1rem",
+                "box_shadow": "0 4px 14px rgba(0,0,0,0.08)",
+                "animation": "shake 0.35s ease-out",
+            },
+        ),
+        rx.box(),
     )
 
 
@@ -217,6 +247,7 @@ def pantalla_victoria() -> rx.Component:
         rx.hstack(
             rx.text("✨", font_size="2.5rem", animation="sparkle 2s infinite"),
             rx.text("🎊", font_size="3rem", animation="bounce-in 0.8s"),
+            rx.text("🌟", font_size="2.7rem", animation="celebration-pop 0.7s"),
             rx.text("✨", font_size="2.5rem", animation="sparkle 2s infinite"),
             spacing="2",
             justify="center",
@@ -224,7 +255,7 @@ def pantalla_victoria() -> rx.Component:
         rx.text(
             "¡Lo resolviste en ",
             PuzzleState.movimientos,
-            " movimientos!",
+            " toques!",
             color=COLORES["texto_secundario"],
             font_size="1.1rem",
             text_align="center",
@@ -253,7 +284,7 @@ def puzzle() -> rx.Component:
             rx.hstack(
                 rx.link(
                     rx.button(
-                        "← Volver",
+                        "🏠 Juegos",
                         radius="full",
                         size="2",
                         style={
@@ -288,6 +319,7 @@ def puzzle() -> rx.Component:
                 PuzzleState.juego_activo | PuzzleState.juego_ganado,
                 rx.vstack(
                     panel_estadisticas(),
+                    mensaje_ayuda(),
                     rx.cond(
                         PuzzleState.juego_ganado,
                         pantalla_victoria(),

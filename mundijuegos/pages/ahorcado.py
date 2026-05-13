@@ -51,15 +51,7 @@ def dibujo_flor() -> rx.Component:
             margin_top="-0.5rem",
         ),
         rx.text(
-            rx.cond(
-                AhorcadoState.juego_activo,
-                f"Pétalos restantes: {AhorcadoState.intentos_restantes}",
-                rx.cond(
-                    AhorcadoState.juego_ganado,
-                    "¡La flor está feliz!",
-                    "La flor perdió sus pétalos...",
-                ),
-            ),
+            AhorcadoState.texto_petalos,
             color=COLORES["texto_secundario"],
             font_size="0.9rem",
             margin_top="0.5rem",
@@ -179,13 +171,13 @@ def panel_configuracion() -> rx.Component:
     return rx.card(
         rx.el.div(
             rx.el.div(
-                rx.text("Intentos", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Pétalos", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.slider(
                     default_value=AhorcadoState.config_intentos,
                     min=3,
                     max=10,
                     step=1,
-                    on_change=AhorcadoState.set_config_intentos,
+                    on_change=AhorcadoState.cambiar_config_intentos,
                     width="100%",
                     color_scheme="pink",
                 ),
@@ -199,13 +191,13 @@ def panel_configuracion() -> rx.Component:
                 style={"display": "flex", "flex_direction": "column", "gap": "0.2rem", "min_width": "80px", "flex": "1"},
             ),
             rx.el.div(
-                rx.text("Min letras", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Palabra corta", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.slider(
                     default_value=AhorcadoState.config_min,
                     min=3,
                     max=8,
                     step=1,
-                    on_change=AhorcadoState.set_config_min,
+                    on_change=AhorcadoState.cambiar_config_min,
                     width="100%",
                     color_scheme="pink",
                 ),
@@ -219,13 +211,13 @@ def panel_configuracion() -> rx.Component:
                 style={"display": "flex", "flex_direction": "column", "gap": "0.2rem", "min_width": "80px", "flex": "1"},
             ),
             rx.el.div(
-                rx.text("Max letras", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Palabra larga", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.slider(
                     default_value=AhorcadoState.config_max,
                     min=6,
                     max=15,
                     step=1,
-                    on_change=AhorcadoState.set_config_max,
+                    on_change=AhorcadoState.cambiar_config_max,
                     width="100%",
                     color_scheme="pink",
                 ),
@@ -239,7 +231,7 @@ def panel_configuracion() -> rx.Component:
                 style={"display": "flex", "flex_direction": "column", "gap": "0.2rem", "min_width": "80px", "flex": "1"},
             ),
             rx.button(
-                "Aplicar",
+                "Empezar",
                 on_click=AhorcadoState.aplicar_configuracion,
                 color_scheme="pink",
                 size="2",
@@ -276,9 +268,9 @@ def panel_configuracion() -> rx.Component:
 def panel_estadisticas() -> rx.Component:
     return rx.vstack(
         rx.hstack(
-            stat_card("🎯", AhorcadoState.puntuacion_partida, "Esta partida", ACENTO_PUNTOS),
-            stat_card("🔥", AhorcadoState.racha_actual,       "Racha",        ACENTO_RACHA),
-            stat_card("🏆", AhorcadoState.mejor_racha,        "Récord racha", ACENTO_RECORD),
+            stat_card("🎯", AhorcadoState.puntuacion_partida, "Ahora",        ACENTO_PUNTOS),
+            stat_card("🔥", AhorcadoState.racha_actual,       "Seguidas",     ACENTO_RACHA),
+            stat_card("🏆", AhorcadoState.mejor_racha,        "Mi mejor",     ACENTO_RECORD),
             stat_card("⭐", AhorcadoState.puntuacion_total,   "Total",        ACENTO_TOTAL),
             spacing="2",
             justify="center",
@@ -310,6 +302,7 @@ def mensaje_estado() -> rx.Component:
                 rx.hstack(
                     rx.text("✨", font_size="2rem", animation="sparkle 2s infinite"),
                     rx.text("🎉", font_size="2.5rem", animation="bounce-in 0.8s"),
+                    rx.text("🌸", font_size="2.6rem", animation="celebration-pop 0.7s"),
                     rx.text("✨", font_size="2rem", animation="sparkle 2s infinite"),
                     spacing="2",
                     justify="center",
@@ -330,7 +323,7 @@ def ahorcado() -> rx.Component:
             rx.hstack(
                 rx.link(
                     rx.button(
-                        "← Volver",
+                        "🏠 Juegos",
                         radius="full",
                         size="2",
                         style={

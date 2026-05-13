@@ -12,11 +12,11 @@ def panel_configuracion() -> rx.Component:
     return rx.card(
         rx.el.div(
             rx.el.div(
-                rx.text("Modo", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Juego", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.hstack(
                     rx.button(
                         "¿Qué color es?",
-                        on_click=ColoresState.set_config_modo(MODO_NOMBRE),
+                        on_click=ColoresState.cambiar_config_modo(MODO_NOMBRE),
                         color_scheme="pink",
                         variant=rx.cond(ColoresState.config_modo == MODO_NOMBRE, "solid", "soft"),
                         size="1",
@@ -24,7 +24,7 @@ def panel_configuracion() -> rx.Component:
                     ),
                     rx.button(
                         "Toca el color",
-                        on_click=ColoresState.set_config_modo(MODO_TOCA),
+                        on_click=ColoresState.cambiar_config_modo(MODO_TOCA),
                         color_scheme="pink",
                         variant=rx.cond(ColoresState.config_modo == MODO_TOCA, "solid", "soft"),
                         size="1",
@@ -35,13 +35,13 @@ def panel_configuracion() -> rx.Component:
                 style={"display": "flex", "flex_direction": "column", "gap": "0.3rem", "min_width": "140px", "flex": "1"},
             ),
             rx.el.div(
-                rx.text("Rondas", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Vueltas", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.slider(
                     default_value=ColoresState.config_rondas,
                     min=5,
                     max=20,
                     step=1,
-                    on_change=ColoresState.set_config_rondas,
+                    on_change=ColoresState.cambiar_config_rondas,
                     width="100%",
                     color_scheme="pink",
                 ),
@@ -55,7 +55,7 @@ def panel_configuracion() -> rx.Component:
                 style={"display": "flex", "flex_direction": "column", "gap": "0.2rem", "min_width": "80px", "flex": "1"},
             ),
             rx.button(
-                "Aplicar",
+                "Empezar",
                 on_click=ColoresState.aplicar_configuracion,
                 color_scheme="pink",
                 size="2",
@@ -91,9 +91,9 @@ def panel_configuracion() -> rx.Component:
 
 def panel_estadisticas() -> rx.Component:
     return rx.hstack(
-        stat_card("🎯", ColoresState.puntuacion_partida, "Esta partida", ACENTO_PUNTOS),
-        stat_card("🔄", ColoresState.ronda_actual,       "Ronda",        ACENTO_RACHA),
-        stat_card("🏆", ColoresState.mejor_puntuacion,   "Mejor",        ACENTO_RECORD),
+        stat_card("🎯", ColoresState.puntuacion_partida, "Ahora",        ACENTO_PUNTOS),
+        stat_card("🔄", ColoresState.ronda_actual,       "Vuelta",       ACENTO_RACHA),
+        stat_card("🏆", ColoresState.mejor_puntuacion,   "Mi mejor",     ACENTO_RECORD),
         spacing="2",
         justify="center",
         wrap="wrap",
@@ -115,6 +115,8 @@ def circulo_color(color_hex: str, size: str = "120px") -> rx.Component:
 
 
 def opcion_nombre(color: dict) -> rx.Component:
+    es_correcta = color["nombre"] == ColoresState.color_correcto["nombre"]
+    es_elegida = color["nombre"] == ColoresState.respuesta_elegida
     return rx.button(
         rx.text(color["nombre"], font_weight="700", font_size="1.1rem"),
         on_click=ColoresState.verificar_respuesta(color["nombre"]),
@@ -122,13 +124,34 @@ def opcion_nombre(color: dict) -> rx.Component:
         radius="full",
         size="3",
         style={
-            "background": "white",
+            "background": rx.cond(
+                ColoresState.mostrar_respuesta & es_correcta,
+                "linear-gradient(145deg, #D3F9D8, #B2F2BB)",
+                rx.cond(
+                    ColoresState.mostrar_respuesta & es_elegida & ~es_correcta,
+                    "linear-gradient(145deg, #FFE3E3, #FFC9C9)",
+                    "white",
+                ),
+            ),
             "color": COLORES["texto_principal"],
-            "border": "2px solid rgba(0,0,0,0.08)",
+            "border": rx.cond(
+                ColoresState.mostrar_respuesta & es_correcta,
+                "3px solid #69DB7C",
+                rx.cond(
+                    ColoresState.mostrar_respuesta & es_elegida & ~es_correcta,
+                    "3px solid #FF8787",
+                    "2px solid rgba(0,0,0,0.08)",
+                ),
+            ),
             "box_shadow": "0 3px 12px rgba(0,0,0,0.13)",
             "min_width": "130px",
             "transition": "all 0.2s ease",
             "cursor": "pointer",
+            "animation": rx.cond(
+                ColoresState.mostrar_respuesta & es_correcta,
+                "celebration-pop 0.45s ease-out",
+                rx.cond(ColoresState.mostrar_respuesta & es_elegida & ~es_correcta, "shake 0.35s ease-out", "none"),
+            ),
         },
         _hover={
             "transform": "translateY(-2px) scale(1.04)",
@@ -138,6 +161,8 @@ def opcion_nombre(color: dict) -> rx.Component:
 
 
 def opcion_circulo(color: dict) -> rx.Component:
+    es_correcta = color["nombre"] == ColoresState.color_correcto["nombre"]
+    es_elegida = color["nombre"] == ColoresState.respuesta_elegida
     return rx.el.button(
         rx.el.div(
             style={
@@ -145,13 +170,27 @@ def opcion_circulo(color: dict) -> rx.Component:
                 "height": "90px",
                 "border_radius": "50%",
                 "background": color["hex"],
-                "border": "5px solid white",
-                "box_shadow": "0 0 0 2px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.15)",
+                "border": rx.cond(
+                    ColoresState.mostrar_respuesta & es_correcta,
+                    "5px solid #69DB7C",
+                    rx.cond(ColoresState.mostrar_respuesta & es_elegida & ~es_correcta, "5px solid #FF8787", "5px solid white"),
+                ),
+                "box_shadow": rx.cond(
+                    ColoresState.mostrar_respuesta & es_correcta,
+                    "0 0 0 5px rgba(105,219,124,0.25), 0 10px 28px rgba(105,219,124,0.35)",
+                    "0 0 0 2px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.15)",
+                ),
                 "transition": "all 0.2s ease",
+                "animation": rx.cond(
+                    ColoresState.mostrar_respuesta & es_correcta,
+                    "celebration-pop 0.45s ease-out",
+                    rx.cond(ColoresState.mostrar_respuesta & es_elegida & ~es_correcta, "shake 0.35s ease-out", "none"),
+                ),
             },
         ),
         on_click=ColoresState.verificar_respuesta(color["nombre"]),
         disabled=ColoresState.mostrar_respuesta,
+        aria_label="Elegir color",
         style={
             "background": "none",
             "border": "none",
@@ -233,6 +272,7 @@ def mensaje_estado() -> rx.Component:
                 rx.hstack(
                     rx.text("✨", font_size="2rem", animation="sparkle 2s infinite"),
                     rx.text("🎉", font_size="2.5rem", animation="bounce-in 0.6s"),
+                    rx.text("🌈", font_size="2.4rem", animation="celebration-pop 0.7s"),
                     rx.text("✨", font_size="2rem", animation="sparkle 2s infinite"),
                     spacing="2",
                     justify="center",
@@ -324,7 +364,7 @@ def colores() -> rx.Component:
             rx.hstack(
                 rx.link(
                     rx.button(
-                        "← Volver",
+                        "🏠 Juegos",
                         radius="full",
                         size="2",
                         style={
@@ -361,7 +401,7 @@ def colores() -> rx.Component:
                 area_juego(),
                 rx.vstack(
                     rx.text(
-                        "Configura arriba y pulsa Aplicar para empezar",
+                        "Elige cómo jugar y pulsa Empezar",
                         color=COLORES["texto_secundario"],
                         text_align="center",
                     ),

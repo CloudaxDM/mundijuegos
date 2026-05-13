@@ -40,6 +40,7 @@ class ColoresState(rx.State):
     mensaje: str = ""
     mostrar_respuesta: bool = False
     ultima_correcta: bool = False
+    respuesta_elegida: str = ""
 
     # --- Estadísticas persistentes (backend) ---
     puntuacion_total: int = 0
@@ -54,10 +55,10 @@ class ColoresState(rx.State):
         self.puntuacion_total = stats.get("puntuacion_total", 0)
         self.mejor_puntuacion = stats.get("mejor_puntuacion", 0)
 
-    def set_config_modo(self, value: str):
+    def cambiar_config_modo(self, value: str):
         self.config_modo = value
 
-    def set_config_rondas(self, value: list[float]):
+    def cambiar_config_rondas(self, value: list[float]):
         self.config_rondas = int(value[0])
 
     def aplicar_configuracion(self):
@@ -77,6 +78,7 @@ class ColoresState(rx.State):
             self.opciones = random.sample([self.color_correcto] + distractores, 6)
         self.mostrar_respuesta = False
         self.ultima_correcta = False
+        self.respuesta_elegida = ""
         self.mensaje = ""
 
     def nueva_partida(self):
@@ -94,6 +96,7 @@ class ColoresState(rx.State):
         correcto = nombre_color == self.color_correcto["nombre"]
         self.mostrar_respuesta = True
         self.ultima_correcta = correcto
+        self.respuesta_elegida = nombre_color
         if correcto:
             self.aciertos_seguidos += 1
             bonus_racha = self.aciertos_seguidos * 5

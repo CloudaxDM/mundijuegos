@@ -64,13 +64,13 @@ class AhorcadoState(rx.State):
     config_min: int = 4
     config_max: int = 10
 
-    def set_config_intentos(self, value: list[float]):
+    def cambiar_config_intentos(self, value: list[float]):
         self.config_intentos = int(value[0])
 
-    def set_config_min(self, value: list[float]):
+    def cambiar_config_min(self, value: list[float]):
         self.config_min = int(value[0])
 
-    def set_config_max(self, value: list[float]):
+    def cambiar_config_max(self, value: list[float]):
         self.config_max = int(value[0])
 
     def cargar_estadisticas(self):
@@ -82,8 +82,10 @@ class AhorcadoState(rx.State):
 
     def aplicar_configuracion(self):
         self.intentos_maximos = self.config_intentos
-        self.longitud_min = self.config_min
-        self.longitud_max = self.config_max
+        self.longitud_min = min(self.config_min, self.config_max)
+        self.longitud_max = max(self.config_min, self.config_max)
+        self.config_min = self.longitud_min
+        self.config_max = self.longitud_max
         self.nueva_partida()
 
     def _filtrar_palabras(self) -> list[str]:
@@ -109,10 +111,10 @@ class AhorcadoState(rx.State):
         if letra in self.letras_adivinadas or letra in self.letras_falladas:
             return
         if letra in self.palabra:
-            self.letras_adivinadas.append(letra)
+            self.letras_adivinadas = [*self.letras_adivinadas, letra]
             self._comprobar_victoria()
         else:
-            self.letras_falladas.append(letra)
+            self.letras_falladas = [*self.letras_falladas, letra]
             self.intentos_restantes -= 1
             self._comprobar_derrota()
 
@@ -191,3 +193,11 @@ class AhorcadoState(rx.State):
     @rx.var(cache=True)
     def petalos_indices(self) -> list[int]:
         return list(range(self.intentos_maximos))
+
+    @rx.var(cache=True)
+    def texto_petalos(self) -> str:
+        if self.juego_activo:
+            return f"Pétalos restantes: {self.intentos_restantes}"
+        if self.juego_ganado:
+            return "¡La flor está feliz!"
+        return "La flor perdió sus pétalos..."

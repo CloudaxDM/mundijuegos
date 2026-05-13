@@ -6,7 +6,7 @@ from mundijuegos.components.layout import fondo_animado
 from mundijuegos.components.stats import stat_card, ratio_pill, ACENTO_PUNTOS, ACENTO_RACHA, ACENTO_RECORD
 from mundijuegos.state.memoria_state import MemoriaState
 
-CARTA_SIZE = "88px"
+CARTA_SIZE = "clamp(52px, 15vw, 88px)"
 
 ESTILO_CARTA_BASE = {
     "width": CARTA_SIZE,
@@ -20,11 +20,13 @@ ESTILO_CARTA_BASE = {
 
 
 def carta_dorso(c: dict) -> rx.Component:
-    return rx.el.div(
+    return rx.el.button(
         "🌸",
         on_click=MemoriaState.voltear_carta(c["id"]),
+        aria_label="Voltear carta oculta",
         style={
             **ESTILO_CARTA_BASE,
+            "appearance": "none",
             "background": f"linear-gradient(145deg, {COLORES['rosa_pastel']}, {COLORES['rosa_chicle']})",
             "border": "3px solid white",
             "box_shadow": "0 5px 16px rgba(0,0,0,0.18)",
@@ -35,6 +37,10 @@ def carta_dorso(c: dict) -> rx.Component:
         _hover={
             "transform": "scale(1.08)",
             "box_shadow": "0 8px 22px rgba(0,0,0,0.22)",
+        },
+        _focus_visible={
+            "outline": f"4px solid {COLORES['rosa_chicle']}",
+            "outline_offset": "3px",
         },
     )
 
@@ -83,9 +89,10 @@ def grid_cartas() -> rx.Component:
         style={
             "display": "grid",
             "grid_template_columns": MemoriaState.grid_cols,
-            "gap": "0.65rem",
+            "gap": "clamp(0.4rem, 1.5vw, 0.65rem)",
             "width": "100%",
             "max_width": MemoriaState.grid_max_width,
+            "justify_content": "center",
         },
     )
 
@@ -94,7 +101,7 @@ def panel_configuracion() -> rx.Component:
     def btn_dif(label: str, value: str) -> rx.Component:
         return rx.button(
             label,
-            on_click=MemoriaState.set_config_dificultad(value),
+            on_click=MemoriaState.cambiar_config_dificultad(value),
             size="1",
             radius="full",
             color_scheme="pink",
@@ -104,7 +111,7 @@ def panel_configuracion() -> rx.Component:
     return rx.card(
         rx.el.div(
             rx.el.div(
-                rx.text("Dificultad", font_size="0.7rem", color=COLORES["texto_secundario"]),
+                rx.text("Nivel", font_size="0.85rem", color=COLORES["texto_secundario"]),
                 rx.hstack(
                     btn_dif("Fácil", "facil"),
                     btn_dif("Medio", "medio"),
@@ -156,12 +163,12 @@ def panel_configuracion() -> rx.Component:
 def panel_estadisticas() -> rx.Component:
     return rx.vstack(
         rx.hstack(
-            stat_card("👆", MemoriaState.movimientos,             "Movimientos",  ACENTO_PUNTOS),
+            stat_card("👆", MemoriaState.movimientos,             "Toques",       ACENTO_PUNTOS),
             stat_card("🃏", MemoriaState.progreso,                "Parejas",      ACENTO_RACHA),
             stat_card(
                 "🏆",
                 rx.cond(MemoriaState.mejor_movimientos_actual == 0, "—", MemoriaState.mejor_movimientos_actual),
-                "Récord",
+                "Mi mejor",
                 ACENTO_RECORD,
             ),
             spacing="2",
@@ -171,6 +178,29 @@ def panel_estadisticas() -> rx.Component:
         ratio_pill(MemoriaState.partidas_ganadas, MemoriaState.partidas_jugadas),
         spacing="2",
         align="center",
+    )
+
+
+def mensaje_ayuda() -> rx.Component:
+    return rx.cond(
+        MemoriaState.mensaje != "",
+        rx.box(
+            rx.text(
+                MemoriaState.mensaje,
+                color=COLORES["texto_principal"],
+                font_weight="700",
+                text_align="center",
+            ),
+            style={
+                "background": "rgba(255,255,255,0.82)",
+                "border": f"2px solid {COLORES['rosa_claro']}",
+                "border_radius": "1rem",
+                "padding": "0.65rem 1rem",
+                "box_shadow": "0 4px 14px rgba(0,0,0,0.08)",
+                "animation": "celebration-pop 0.35s ease-out",
+            },
+        ),
+        rx.box(),
     )
 
 
@@ -186,6 +216,7 @@ def pantalla_victoria() -> rx.Component:
         rx.hstack(
             rx.text("✨", font_size="2.5rem", animation="sparkle 2s infinite"),
             rx.text("🎊", font_size="3rem", animation="bounce-in 0.8s"),
+            rx.text("🦄", font_size="2.8rem", animation="celebration-pop 0.7s"),
             rx.text("✨", font_size="2.5rem", animation="sparkle 2s infinite"),
             spacing="2",
             justify="center",
@@ -193,7 +224,7 @@ def pantalla_victoria() -> rx.Component:
         rx.text(
             "¡Lo hiciste en ",
             MemoriaState.movimientos,
-            " movimientos!",
+            " toques!",
             color=COLORES["texto_secundario"],
             font_size="1.1rem",
             text_align="center",
@@ -228,7 +259,7 @@ def memoria() -> rx.Component:
             rx.hstack(
                 rx.link(
                     rx.button(
-                        "← Volver",
+                        "🏠 Juegos",
                         radius="full",
                         size="2",
                         style={
@@ -263,6 +294,7 @@ def memoria() -> rx.Component:
                 MemoriaState.juego_activo | MemoriaState.juego_ganado,
                 rx.vstack(
                     panel_estadisticas(),
+                    mensaje_ayuda(),
                     rx.cond(
                         MemoriaState.juego_ganado,
                         pantalla_victoria(),

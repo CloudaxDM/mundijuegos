@@ -65,6 +65,7 @@ def modulo_card(
             max_width="280px",
         ),
         href=href if activo else "#",
+        aria_label=f"Abrir juego {titulo}" if activo else f"{titulo} próximamente",
         text_decoration="none",
         width="100%",
         display="flex",

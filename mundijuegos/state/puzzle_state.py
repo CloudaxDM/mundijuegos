@@ -20,6 +20,7 @@ class PuzzleState(rx.State):
     juego_activo: bool = False
     juego_ganado: bool = False
     config_size: int = 3
+    mensaje: str = ""
 
     # Estadísticas
     mejor_mov_facil: int = 0
@@ -34,13 +35,14 @@ class PuzzleState(rx.State):
         self.partidas_jugadas = stats.get("partidas_jugadas", 0)
         self.partidas_ganadas = stats.get("partidas_ganadas", 0)
 
-    def set_config_size(self, value: int):
+    def cambiar_config_size(self, value: int):
         self.config_size = value
         self.tiles = []
         self.juego_activo = False
         self.juego_ganado = False
         self.movimientos = 0
         self.blank_pos = -1
+        self.mensaje = ""
 
     def nueva_partida(self):
         n = self.config_size
@@ -66,6 +68,7 @@ class PuzzleState(rx.State):
         self.movimientos = 0
         self.juego_activo = True
         self.juego_ganado = False
+        self.mensaje = ""
 
     def _vecinos(self, pos: int, n: int) -> list[int]:
         row, col = divmod(pos, n)
@@ -80,8 +83,10 @@ class PuzzleState(rx.State):
         if not self.juego_activo or pos == self.blank_pos:
             return
         if pos not in self._vecinos(self.blank_pos, self.size):
+            self.mensaje = "Busca una pieza pegadita al hueco 🕳️"
             return
 
+        self.mensaje = ""
         tiles = list(self.tiles)
         emoji_movido = tiles[pos]["emoji"]
         tiles[self.blank_pos] = {"pos": self.blank_pos, "emoji": emoji_movido}
@@ -93,6 +98,7 @@ class PuzzleState(rx.State):
         if [t["emoji"] for t in tiles] == self.solucion:
             self.juego_ganado = True
             self.juego_activo = False
+            self.mensaje = "¡Lo has conseguido! 🎉"
             self._guardar_estadisticas()
 
     def _guardar_estadisticas(self):

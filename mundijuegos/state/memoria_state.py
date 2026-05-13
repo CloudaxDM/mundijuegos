@@ -31,6 +31,7 @@ class MemoriaState(rx.State):
     juego_activo: bool = False
     juego_ganado: bool = False
     config_dificultad: str = "facil"
+    mensaje: str = ""
 
     # Estadísticas persistentes
     mejor_movimientos_facil: int = 0
@@ -47,7 +48,7 @@ class MemoriaState(rx.State):
         self.partidas_jugadas = stats.get("partidas_jugadas", 0)
         self.partidas_ganadas = stats.get("partidas_ganadas", 0)
 
-    def set_config_dificultad(self, value: str):
+    def cambiar_config_dificultad(self, value: str):
         self.config_dificultad = value
         self.cartas = []
         self.juego_activo = False
@@ -56,6 +57,7 @@ class MemoriaState(rx.State):
         self.parejas_encontradas = 0
         self.primera_carta = -1
         self.bloqueado = False
+        self.mensaje = ""
 
     def nueva_partida(self):
         config = DIFICULTADES[self.config_dificultad]
@@ -74,6 +76,7 @@ class MemoriaState(rx.State):
         self.parejas_encontradas = 0
         self.juego_activo = True
         self.juego_ganado = False
+        self.mensaje = ""
 
     async def voltear_carta(self, index: int):
         if self.bloqueado:
@@ -89,6 +92,7 @@ class MemoriaState(rx.State):
 
         if self.primera_carta == -1:
             self.primera_carta = index
+            self.mensaje = "Busca su pareja 👀"
             return
 
         # Segunda carta seleccionada
@@ -109,11 +113,15 @@ class MemoriaState(rx.State):
             if self.parejas_encontradas >= self.total_parejas:
                 self.juego_ganado = True
                 self.juego_activo = False
+                self.mensaje = "¡Todas las parejas juntas! 🎉"
                 self._guardar_estadisticas()
+            else:
+                self.mensaje = "¡Pareja encontrada! ✨"
         else:
             nuevas[i1] = {**nuevas[i1], "volteada": False}
             nuevas[i2] = {**nuevas[i2], "volteada": False}
             self.cartas = nuevas
+            self.mensaje = "Casi, prueba otra pareja 💪"
 
         self.primera_carta = -1
         self.bloqueado = False
